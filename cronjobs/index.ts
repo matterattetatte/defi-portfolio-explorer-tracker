@@ -31,8 +31,6 @@ const ticks = lpDistribution.ticks
 console.table(ticks.slice(0, 100))
 
 
-
-
 // Load environment variables
 dotenv.config();
 
@@ -81,28 +79,6 @@ async function main() {
     console.warn("Warning: Account balance is 0 ETH. Please acquire test tokens from the faucet.");
   }
 
-  // Set up real-time event watching
-  const unsubscribe = client.watchLogs({
-    fromBlock: BigInt(await client.getRawClient().httpClient.getBlockNumber()),
-    onCreated: (args) => {
-      console.log("WATCH-> Create:", args);
-    },
-    onUpdated: (args) => {
-      console.log("WATCH-> Update:", args);
-    },
-    onExtended: (args) => {
-      console.log("WATCH-> Extend:", args);
-    },
-    onDeleted: (args) => {
-      console.log("WATCH-> Delete:", args);
-    },
-    onError: (error) => {
-      console.error("WATCH-> Error:", error);
-    },
-    pollingInterval: 1000,
-    transport: "websocket",
-  });
-  
   // 2. CREATE - Single entity with annotations
   const id = randomUUID();
   const entity: GolemBaseCreate = {
@@ -135,33 +111,7 @@ async function main() {
     const data = JSON.parse(new TextDecoder().decode(result.storageValue));
     console.log("Query result:", data);
   }
-  
-  // 4. UPDATE - Modify existing entity
-  const updateData: GolemBaseUpdate = {
-    entityKey: entityKey,
-    data: new TextEncoder().encode(JSON.stringify({
-      message: "Updated message from ETHWarsaw!",
-      updated: true,
-      updateTime: Date.now()
-    })),
-    btl: 600, // ~20 minutes (600 blocks * 2 seconds = 1200 seconds)
-    stringAnnotations: [
-      new Annotation("type", "message"),
-      new Annotation("id", id),
-      new Annotation("status", "updated")
-    ],
-    numericAnnotations: [
-      new Annotation("version", 2)
-    ]
-  };
-  
-  const updateReceipts = await client.updateEntities([updateData]);
-  console.log(`Updated entity: ${updateReceipts[0].entityKey}`);
-  
-  // 5. QUERY updated entity
-  const updatedResults = await client.queryEntities(`id = "${id}" && version = 2`);
-  console.log(`Found ${updatedResults.length} updated entities`);
-  
+
   // 6. BATCH OPERATIONS - Create multiple entities
   const batchEntities: GolemBaseCreate[] = [];
   for (let i = 0; i < 5; i++) {
@@ -191,18 +141,7 @@ async function main() {
   // Check metadata to verify BTL
   const metadata = await client.getEntityMetaData(entityKey);
   console.log(`Entity expires at block: ${metadata.expiresAtBlock}`);
-  
-  // 8. DELETE - Remove entity
-  const deleteReceipts = await client.deleteEntities([entityKey]);
-  console.log(`Deleted entity: ${deleteReceipts[0].entityKey}`);
-  
-  // Clean up batch entities
-  for (const receipt of batchReceipts) {
-    await client.deleteEntities([receipt.entityKey]);
-  }
-  
-  // Stop watching events
-  unsubscribe();
+
   console.log("Complete!");
   
   // Clean exit
