@@ -105,7 +105,7 @@ async function main() {
   // future: store the list of
 
   // fetching snapshot 1once an hour
-  const response = await fetch('https://app.metrix.finance/api/trpc/exchanges.getSimulatePool,exchanges.getPoolTicks,coinGecko.getTokenPrices?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22exchange%22%3A%22uniswap%22%2C%22network%22%3A%22base%22%2C%22poolAddress%22%3A%220xd0b53D9277642d899DF5C87A3966A349A798F224%22%2C%22apiKey%22%3A1%7D%7D%2C%221%22%3A%7B%22json%22%3A%7B%22exchange%22%3A%22uniswap%22%2C%22network%22%3A%22base%22%2C%22poolAddress%22%3A%220xd0b53D9277642d899DF5C87A3966A349A798F224%22%2C%22token0Decimals%22%3A18%2C%22token1Decimals%22%3A18%7D%7D%2C%222%22%3A%7B%22json%22%3A%7B%22apiKey%22%3A1%2C%22calculationRange%22%3A%2290%22%2C%22coinGeckoId%22%3A%22%22%7D%7D%2C%223%22%3A%7B%22json%22%3A%7B%22exchange%22%3A%22uniswap%22%2C%22network%22%3A%22base%22%2C%22poolAddress%22%3A%220xd0b53D9277642d899DF5C87A3966A349A798F224%22%2C%22feeTier%22%3A%22100%22%2C%22apiKey%22%3A1%2C%22baseTokenAddress%22%3A%22%22%7D%7D%7D').then((r) => r.json())
+  const response = await fetch('https://app.metrix.finance/api/trpc/exchanges.getSimulatePool,exchanges.getPoolTicks?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22exchange%22%3A%22uniswap%22%2C%22network%22%3A%22base%22%2C%22poolAddress%22%3A%220xd0b53D9277642d899DF5C87A3966A349A798F224%22%2C%22apiKey%22%3A1%7D%7D%2C%221%22%3A%7B%22json%22%3A%7B%22exchange%22%3A%22uniswap%22%2C%22network%22%3A%22base%22%2C%22poolAddress%22%3A%220xd0b53D9277642d899DF5C87A3966A349A798F224%22%2C%22token0Decimals%22%3A18%2C%22token1Decimals%22%3A18%7D%7D%2C%222%22%3A%7B%22json%22%3A%7B%22apiKey%22%3A1%2C%22calculationRange%22%3A%2290%22%2C%22coinGeckoId%22%3A%22%22%7D%7D%2C%223%22%3A%7B%22json%22%3A%7B%22exchange%22%3A%22uniswap%22%2C%22network%22%3A%22base%22%2C%22poolAddress%22%3A%220xd0b53D9277642d899DF5C87A3966A349A798F224%22%2C%22feeTier%22%3A%22100%22%2C%22apiKey%22%3A1%2C%22baseTokenAddress%22%3A%22%22%7D%7D%7D').then((r) => r.json())
   // const response = await fetch('https://app.metrix.finance/api/trpc/exchanges.getSimulatePool,exchanges.getPoolTicks,coinGecko.getTokenPrices,exchanges.getPoolHistory?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22exchange%22%3A%22uniswap%22%2C%22network%22%3A%22ethereum%22%2C%22poolAddress%22%3A%220x531b6a4b3f962208ea8ed5268c642c84bb29be0b%22%2C%22apiKey%22%3A1%7D%7D%2C%221%22%3A%7B%22json%22%3A%7B%22exchange%22%3A%22uniswap%22%2C%22network%22%3A%22ethereum%22%2C%22poolAddress%22%3A%220x531b6a4b3f962208ea8ed5268c642c84bb29be0b%22%2C%22token0Decimals%22%3A18%2C%22token1Decimals%22%3A18%7D%7D%2C%222%22%3A%7B%22json%22%3A%7B%22apiKey%22%3A1%2C%22calculationRange%22%3A%2290%22%2C%22coinGeckoId%22%3A%22%22%7D%7D%2C%223%22%3A%7B%22json%22%3A%7B%22exchange%22%3A%22uniswap%22%2C%22network%22%3A%22ethereum%22%2C%22poolAddress%22%3A%220x531b6a4b3f962208ea8ed5268c642c84bb29be0b%22%2C%22feeTier%22%3A%22100%22%2C%22apiKey%22%3A1%2C%22baseTokenAddress%22%3A%22%22%7D%7D%7D').then((r) => r.json())
 
   const { 
@@ -114,6 +114,7 @@ async function main() {
   } = response
 
 
+  console.log('summary', summary)
   const lpData = prepareLiquidityData(summary, lpDistribution.ticks)
   console.table('lp data', lpData.slice(-100))
 
@@ -130,10 +131,13 @@ async function main() {
   //   console.log("Query result:", data);
   // }
 
+  // TODO: CALCULATE TICK IDX FOR CURRENT PRICE BASED ON DATA IN SUMMARY COMPARED TO THE TICKS!!
+  const tickIdxForCurentPrice = 100
+
   // 6. BATCH OPERATIONS - Create multiple entities
   const now = new Date()
   now.setMinutes(0, 0, 0);
-  const batchEntities: GolemBaseCreate[] = lpData.slice(0, -1).map(({ tickIdx, token0Amount, token1Amount }: any, i: number) => ({
+  const batchEntities: GolemBaseCreate[] = lpData.slice(tickIdxForCurentPrice - 50, tickIdxForCurentPrice + 50).map(({ tickIdx, token0Amount, token1Amount }: any, i: number) => ({
     data: new TextEncoder().encode(`Snapshot at datehour ${now.toISOString()}`),
     btl: 100,
     stringAnnotations: [
