@@ -106,7 +106,7 @@ const LiquidityDistribution = ({
         <div>
           <h2 className="text-xl font-bold text-foreground">Liquidity Distribution</h2>
           <div className="text-sm text-muted-foreground mt-1">
-            1 LINK = {currentPrice.toFixed(4)} USDC
+            1 GLM = {currentPrice.toFixed(4)} WETH
           </div>
           <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
