@@ -24,7 +24,6 @@ import { Icon } from "./components/DemoComponents";
 import { Home } from "./components/DemoComponents";
 import { Features } from "./components/DemoComponents";
 import { MetaMaskWallet } from "@/app/components/MetaMaskWallet";
-import PriceChart from "@/components/PriceChart";
 import LPAnalytics from "@/components/LPAnalytics";
 import LiquidityDistribution from "@/components/LiquidityDistribution";
 import { useMockData } from "@/hooks/useMockData";
@@ -32,7 +31,7 @@ import { useMockData } from "@/hooks/useMockData";
 export default function App() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
   const [frameAdded, setFrameAdded] = useState(false);
-  const [activeTab, setActiveTab] = useState("home");
+  const [activeTab, setActiveTab] = useState("defi");
   
   // DeFi Analytics state
   const { priceData, lpData } = useMockData();
@@ -109,63 +108,11 @@ export default function App() {
         </header>
 
         <main className="flex-1">
-          {activeTab === "home" && (
-            <div>
-              <Home setActiveTab={setActiveTab} />
-              {/* DeFi Analytics Navigation */}
-              <div className="mt-4 space-y-2">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => setActiveTab("defi")}
-                >
-                  <Icon name="star" size="sm" className="mr-2" />
-                  DeFi Analytics
-                </Button>
-              </div>
-            </div>
-          )}
-          {activeTab === "features" && <Features setActiveTab={setActiveTab} />}
-          {activeTab === "wallet" && (
-            <div>
-              <div className="mb-6">
-                <h1 className="text-2xl font-bold text-[var(--app-foreground)] mb-2">
-                  Wallet Connection
-                </h1>
-                <p className="text-[var(--app-text-muted)]">
-                  Connect your MetaMask or other supported wallets
-                </p>
-              </div>
-              <MetaMaskWallet />
-              <div className="mt-6 flex justify-center">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setActiveTab("home")}
-                  className="text-[var(--app-text-muted)]"
-                >
-                  ← Back to Home
-                </Button>
-              </div>
-              </div>
-          )}
           {activeTab === "defi" && (
             <div className="space-y-6">
               {/* DeFi Analytics Header */}
               <div className="text-center">
-                <div className="flex items-center justify-between mb-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setActiveTab("home")}
-                    className="text-muted-foreground"
-                  >
-                    <Icon name="arrow-right" size="sm" className="mr-1 rotate-180" />
-                    Back
-                  </Button>
-                  <div className="flex-1"></div>
-                </div>
-                <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
+                <h1 className="text-2xl font-bold bg-clip-text mb-2">
                   DeFi Analytics
                 </h1>
                 <p className="text-muted-foreground text-sm">
@@ -205,8 +152,6 @@ export default function App() {
                     timestamps={priceData.map(d => d.timestamp)}
                   />
 
-                  {/* Price Chart */}
-                  <PriceChart data={priceData} currentIndex={currentIndex} />
 
                   {/* LP Analytics */}
                   <div>
@@ -225,6 +170,29 @@ export default function App() {
                 </div>
               )}
             </div>
+          )}
+          {activeTab === "wallet" && (
+            <div>
+              <div className="mb-6">
+                <h1 className="text-2xl font-bold text-[var(--app-foreground)] mb-2">
+                  Wallet Connection
+                </h1>
+                <p className="text-[var(--app-text-muted)]">
+                  Connect your MetaMask or other supported wallets
+                </p>
+              </div>
+              <MetaMaskWallet />
+              <div className="mt-6 flex justify-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setActiveTab("home")}
+                  className="text-[var(--app-text-muted)]"
+                >
+                  ← Back to Home
+                </Button>
+              </div>
+              </div>
           )}
         </main>
 

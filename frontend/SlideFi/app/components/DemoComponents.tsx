@@ -160,6 +160,7 @@ type HomeProps = {
 export function Home({ setActiveTab }: HomeProps) {
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/slidefi-logo.png" alt="SlideFi Logo" className="mx-auto h-20 w-auto" />
       <Card title="My First Mini App">
         <p className="text-[var(--app-foreground-muted)] mb-4">
