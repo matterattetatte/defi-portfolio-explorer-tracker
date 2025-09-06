@@ -1,7 +1,18 @@
 {
-    "accountAssociation": {
-      "header": "eyJmaWQiOjIyNzQ1OSwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweEMwYWYzNzRBQjlFNjYxNjc1NzkwMmViNjJiNTA2RDljNDVBZjc2MkYifQ",
-      "payload": "eyJkb21haW4iOiJzbGlkZS0ybGhsZ3NjeGEtanNjb3R0b3pzLXByb2plY3RzLnZlcmNlbC5hcHAifQ",
-      "signature": "MHgyZTVhMmUxMjgyNjA1NjU4Yjk5MjA0ODdlOTVmYzA5MzQ4MGVmYzc1MTAwYWRjOWY4ZDA3MzA5NGNmN2IyMjIxMGZmMThiODI3YWRmMWFiYTc4MGZiMTQwNzVkZjM1N2E1MTg5MTQ2NDI0NGJjMGQxOGVmZWY4Yzk5MjY0NTI5NDFi"
-    }
+  "accountAssociation": {
+    "header": "eyJmaWQiOjEzMjcxNDQsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgwQkM3NkMwN0NlMGIyQUJjRjVkM2U1YmNCNDM1M2VjQzRDNTlFNjFEIn0",
+    "payload": "eyJkb21haW4iOiJkZWZpLXBvcnRmb2xpby1leHBsb3Jlci10cmFja2VyLnZlcmNlbC5hcHAifQ",
+    "signature": "MHhiYWJkODI2OWVjMGFiNWI1ODZmNTAwMDI1MWI3MTM2NDcxN2ZmNGY2MjU0MTM2MjZjNmM2Yzk4MmI1YWI5N2JkNGVjNmIxMzAzMjg5ODlhMTcxMDkzNDVkMjgzYmM0NzA2MWYzY2QzMjZlZTU1ZTgzNWNlOGNhOTQ3ZTllYjUwNTFi"
+  },
+  "frame": {
+    "version": "1",
+    "name": "Example Frame",
+    "iconUrl": "https://defi-portfolio-explorer-tracker.vercel.app/icon.png",
+    "homeUrl": "https://defi-portfolio-explorer-tracker.vercel.app",
+    "imageUrl": "https://defi-portfolio-explorer-tracker.vercel.app/image.png",
+    "buttonTitle": "Check this out",
+    "splashImageUrl": "https://defi-portfolio-explorer-tracker.vercel.app/splash.png",
+    "splashBackgroundColor": "#eeccff",
+    "webhookUrl": "https://defi-portfolio-explorer-tracker.vercel.app/api/webhook"
   }
+}
