@@ -129,7 +129,6 @@ async function main() {
       1: { result: { data: { json: lpDistribution} } },
   } = response
 
-
   console.log('summary', summary)
 
 const targetTick = Number(summary.tick);
@@ -145,8 +144,6 @@ const tickArrIdxForCurentPrice = lpDistribution.ticks.reduce((acc: any, curr: an
 
   const lpData = prepareLiquidityData(summary, lpDistribution.ticks.slice(tickArrIdxForCurentPrice - 50, tickArrIdxForCurentPrice + 50), summary.tick)
 
-  // use timestamp as annotation, restu jsut a json stringify for the datafield!!!!!
-  // 6. BATCH OPERATIONS - Create multiple entities
   const now = new Date()
   now.setMinutes(0, 0, 0);
   const batchEntities: GolemBaseCreate[] = lpData.map(({ priceLower, priceUpper, totalAmount }: any, i: number) => ({
@@ -161,8 +158,6 @@ const tickArrIdxForCurentPrice = lpDistribution.ticks.reduce((acc: any, curr: an
       new Annotation("lpAddress", summary.address), 
     ]
   }));
-
-  console.log('hehehe', batchEntities.length)
 
   const batchReceipts = await client.createEntities(batchEntities);
 
