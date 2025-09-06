@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import PriceChart from '@/components/PriceChart';
 import LPAnalytics from '@/components/LPAnalytics';
 import TimeSlider from '@/components/TimeSlider';
@@ -44,6 +45,12 @@ const Index = () => {
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Base Network</p>
               <p className="text-primary font-medium">Uniswap V3</p>
+              <Link 
+                to="/slidefi" 
+                className="inline-block mt-2 px-3 py-1 text-xs bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+              >
+                SlideFi App →
+              </Link>
             </div>
           </div>
         </div>
