@@ -22,6 +22,8 @@ import LPAnalytics from "@/components/LPAnalytics";
 import LiquidityDistribution from "@/components/LiquidityDistribution";
 import { useMockData } from "@/hooks/useMockData";
 
+await sdk.actions.ready();
+
 export default function App() {
   const [activeTab, setActiveTab] = useState("defi");
   
@@ -33,14 +35,6 @@ export default function App() {
   const handleZoomIn = () => {};
   const handleZoomOut = () => {};
 
-  
-    useEffect(() => {
-    (async () => {
-      debugger
-      await sdk.actions.ready();
-      console.log('sdk', sdk)
-    })();
-  }, []);
 
   return (
     <div className="flex flex-col min-h-screen font-sans text-foreground bg-background">
