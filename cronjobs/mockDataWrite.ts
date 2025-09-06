@@ -61,13 +61,15 @@ const mockDataWrite = async () => {
 
     console.log('Deleting entities....', )
     await client.deleteEntities(entityKeys.slice(0, 2000))
+    await client.deleteEntities(entityKeys.slice(2000, 4000))
+    await client.deleteEntities(entityKeys.slice(4000, 6001))
     console.log(`Deleted ${entityKeys.length} entities. Now creating mock data...`)
 
     const today = new Date()
     today.setMinutes(0, 0, 0);
-    await Promise.all(lps.map(async (lp: any) => {
+    const entitiesToBatch = lps.flatMap((lp: any) => {
       // process.exit(1)
-        const batchEntities: GolemBaseCreate[] = await Promise.all(lp.ticks.map(({ priceLower, priceUpper, totalAmount }: any, i: number) => ({
+        return lp.ticks.map(({ priceLower, priceUpper, totalAmount }: any, i: number) => ({
             data: new TextEncoder().encode(JSON.stringify({ priceLower, priceUpper, totalAmount })),
             btl: 1296000,  // Block-To-Live ~30 days (each block ~2 seconds)
             numericAnnotations: [
@@ -79,11 +81,15 @@ const mockDataWrite = async () => {
             new Annotation("type", "lpSnapShot"), 
             new Annotation("lpAddress", lp.poolAddress), 
             ]
-        })));
-        
-        console.log(`Inserting batch of ${batchEntities.length}...`)
-        return client.createEntities(batchEntities);
-    }))
+        }))
+      })
+
+      await client.createEntities(entitiesToBatch.slice(0, 1000));
+      await client.createEntities(entitiesToBatch.slice(1000, 2000));
+      await client.createEntities(entitiesToBatch.slice(2000, 3000));
+      await client.createEntities(entitiesToBatch.slice(3000, 4000));
+      await client.createEntities(entitiesToBatch.slice(4000, 5000));
+      await client.createEntities(entitiesToBatch.slice(5000));
 }
 
 mockDataWrite().then(() => {
