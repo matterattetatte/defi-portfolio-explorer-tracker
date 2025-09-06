@@ -23,7 +23,7 @@ import { Button } from "./components/DemoComponents";
 import { Icon } from "./components/DemoComponents";
 import { Home } from "./components/DemoComponents";
 import { Features } from "./components/DemoComponents";
-import { MetaMaskWallet } from "./components/MetaMaskWallet";
+import { MetaMaskWallet } from "@/app/components/MetaMaskWallet";
 import PriceChart from "@/components/PriceChart";
 import LPAnalytics from "@/components/LPAnalytics";
 import LiquidityDistribution from "@/components/LiquidityDistribution";

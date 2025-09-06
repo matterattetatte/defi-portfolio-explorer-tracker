@@ -2,8 +2,6 @@
 
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
-import Image from "next/image";
-import SlideFiLogo  from "../../public/slidefi-logo.png"
 import {
   Transaction,
   TransactionButton,
@@ -162,7 +160,7 @@ type HomeProps = {
 export function Home({ setActiveTab }: HomeProps) {
   return (
     <div className="space-y-6 animate-fade-in">
-      <Image src={SlideFiLogo} alt="SlideFi Logo" width={200} height={100} className="mx-auto" />
+      <img src="/slidefi-logo.png" alt="SlideFi Logo" className="mx-auto h-20 w-auto" />
       <Card title="My First Mini App">
         <p className="text-[var(--app-foreground-muted)] mb-4">
           This is a minimalistic Mini App built with OnchainKit components.
