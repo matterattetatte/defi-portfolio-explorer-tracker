@@ -1,73 +1,112 @@
-# Welcome to your Lovable project
+# MiniKit Template
 
-## Project info
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-onchain --mini`](), configured with:
 
-**URL**: https://lovable.dev/projects/6b0a1e16-1009-4a9d-b6bf-28446b8fe192
+- [MiniKit](https://docs.base.org/builderkits/minikit/overview)
+- [OnchainKit](https://www.base.org/builders/onchainkit)
+- [Tailwind CSS](https://tailwindcss.com)
+- [Next.js](https://nextjs.org/docs)
 
-## How can I edit this code?
+## Getting Started
 
-There are several ways of editing your application.
+1. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+# or
+bun install
+```
 
-**Use Lovable**
+2. Verify environment variables, these will be set up by the `npx create-onchain --mini` command:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/6b0a1e16-1009-4a9d-b6bf-28446b8fe192) and start prompting.
+You can regenerate the FARCASTER Account Association environment variables by running `npx create-onchain --manifest` in your project directory.
 
-Changes made via Lovable will be committed automatically to this repo.
+The environment variables enable the following features:
 
-**Use your preferred IDE**
+- Frame metadata - Sets up the Frame Embed that will be shown when you cast your frame
+- Account association - Allows users to add your frame to their account, enables notifications
+- Redis API keys - Enable Webhooks and background notifications for your application by storing users notification details
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+```bash
+# Shared/OnchainKit variables
+NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME=
+NEXT_PUBLIC_URL=
+NEXT_PUBLIC_ICON_URL=
+NEXT_PUBLIC_ONCHAINKIT_API_KEY=
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+# Frame metadata
+FARCASTER_HEADER=
+FARCASTER_PAYLOAD=
+FARCASTER_SIGNATURE=
+NEXT_PUBLIC_APP_ICON=
+NEXT_PUBLIC_APP_SUBTITLE=
+NEXT_PUBLIC_APP_DESCRIPTION=
+NEXT_PUBLIC_APP_SPLASH_IMAGE=
+NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR=
+NEXT_PUBLIC_APP_PRIMARY_CATEGORY=
+NEXT_PUBLIC_APP_HERO_IMAGE=
+NEXT_PUBLIC_APP_TAGLINE=
+NEXT_PUBLIC_APP_OG_TITLE=
+NEXT_PUBLIC_APP_OG_DESCRIPTION=
+NEXT_PUBLIC_APP_OG_IMAGE=
 
-Follow these steps:
+# Redis config
+REDIS_URL=
+REDIS_TOKEN=
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Start the development server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Template Features
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Frame Configuration
+- `.well-known/farcaster.json` endpoint configured for Frame metadata and account association
+- Frame metadata automatically added to page headers in `layout.tsx`
 
-**Use GitHub Codespaces**
+### Background Notifications
+- Redis-backed notification system using Upstash
+- Ready-to-use notification endpoints in `api/notify` and `api/webhook`
+- Notification client utilities in `lib/notification-client.ts`
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Theming
+- Custom theme defined in `theme.css` with OnchainKit variables
+- Pixel font integration with Pixelify Sans
+- Dark/light mode support through OnchainKit
 
-## What technologies are used for this project?
+### MiniKit Provider
+The app is wrapped with `MiniKitProvider` in `providers.tsx`, configured with:
+- OnchainKit integration
+- Access to Frames context
+- Sets up Wagmi Connectors
+- Sets up Frame SDK listeners
+- Applies Safe Area Insets
 
-This project is built with:
+## Customization
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+To get started building your own frame, follow these steps:
 
-## How can I deploy this project?
+1. Remove the DemoComponents:
+   - Delete `components/DemoComponents.tsx`
+   - Remove demo-related imports from `page.tsx`
 
-Simply open [Lovable](https://lovable.dev/projects/6b0a1e16-1009-4a9d-b6bf-28446b8fe192) and click on Share -> Publish.
+2. Start building your Frame:
+   - Modify `page.tsx` to create your Frame UI
+   - Update theme variables in `theme.css`
+   - Adjust MiniKit configuration in `providers.tsx`
 
-## Can I connect a custom domain to my Lovable project?
+3. Add your frame to your account:
+   - Cast your frame to see it in action
+   - Share your frame with others to start building your community
 
-Yes, you can!
+## Learn More
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- [MiniKit Documentation](https://docs.base.org/builderkits/minikit/overview)
+- [OnchainKit Documentation](https://docs.base.org/builderkits/onchainkit/getting-started)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
