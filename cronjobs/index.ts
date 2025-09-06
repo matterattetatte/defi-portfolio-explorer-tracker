@@ -151,7 +151,7 @@ const tickArrIdxForCurentPrice = lpDistribution.ticks.reduce((acc: any, curr: an
   now.setMinutes(0, 0, 0);
   const batchEntities: GolemBaseCreate[] = lpData.map(({ priceLower, priceUpper, totalAmount }: any, i: number) => ({
     data: new TextEncoder().encode(JSON.stringify({ priceLower, priceUpper, totalAmount })),
-    btl: 100,
+    btl: 1296000,  // Block-To-Live ~30 days (each block ~2 seconds)
     numericAnnotations: [
       new Annotation("sequence", i + 1),  // Start from 1 per your SDK note
       new Annotation("timestamp", now.getTime()), // unix timestamp
