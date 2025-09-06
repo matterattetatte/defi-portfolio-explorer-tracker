@@ -13,6 +13,8 @@ import {
   WalletDropdown,
   WalletDropdownDisconnect,
 } from "@coinbase/onchainkit/wallet";
+import { useEffect } from 'react';
+import { sdk } from '@farcaster/miniapp-sdk';
 import { useState } from "react";
 import { Button } from "./components/DemoComponents";
 import { MetaMaskWallet } from "@/app/components/MetaMaskWallet";
@@ -30,6 +32,13 @@ export default function App() {
   // DeFi Analytics handlers
   const handleZoomIn = () => {};
   const handleZoomOut = () => {};
+
+  
+    useEffect(() => {
+    (async () => {
+      await sdk.actions.ready();
+    })();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen font-sans text-foreground bg-background">
