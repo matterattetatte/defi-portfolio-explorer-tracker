@@ -3,6 +3,10 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, Minus, Lock } from 'lucide-react';
 import TimeSlider from './TimeSlider';
+import { useEffect, useMemo, useState } from 'react';
+import { createROClient } from "golem-base-sdk";
+import { Logger, ILogObj } from "tslog";
+
 
 interface LiquidityData {
   tick: number;
@@ -22,6 +26,34 @@ interface LiquidityDistributionProps {
   timestamps: string[];
 }
 
+// look at options object deocs nees conrjobs pfolder
+
+
+const logLevelMap: Record<string, number> = {
+  silly: 0,
+  trace: 1,
+  debug: 2,
+  info: 3,
+  warn: 4,
+  error: 5,
+  fatal: 6
+};
+
+const logger = new Logger<ILogObj>({
+  name: "GolemDB Example",
+  minLevel: logLevelMap[process.env.LOG_LEVEL as keyof typeof logLevelMap] || logLevelMap.info
+});
+
+const client = createROClient(
+    60138453033,
+    "https://ethwarsaw.holesky.golemdb.io/rpc",
+    "wss://ethwarsaw.holesky.golemdb.io/rpc/ws",
+    logger
+)
+
+const ownerAddress = '0xa10470C0F296E598945710b3100ca4CC2B43bA20'
+const lpAddress = '0xFe4ec8F377be9e1e95A49d4e0D20F52D07b1ff0D' // glm/weth
+
 const LiquidityDistribution = ({ 
   currentPrice, 
   onZoomIn, 
@@ -31,33 +63,59 @@ const LiquidityDistribution = ({
   currentIndex,
   maxIndex,
   onIndexChange,
-  timestamps
+  timestamps,
 }: LiquidityDistributionProps) => {
-  // Generate liquidity distribution data that resembles a bell curve
-  const generateLiquidityData = (): LiquidityData[] => {
-    const data: LiquidityData[] = [];
-    const centerPrice = currentPrice;
-    const numBars = 100;
-    
-    for (let i = 0; i < numBars; i++) {
-      const priceRange = centerPrice * 0.4; // ±20% from center
-      const price = centerPrice - priceRange/2 + (priceRange * i / numBars);
-      
-      // Create bell curve distribution
-      const distanceFromCenter = Math.abs(i - numBars/2) / (numBars/2);
-      const liquidity = Math.exp(-Math.pow(distanceFromCenter * 2.5, 2)) * (0.8 + Math.random() * 0.4);
-      
-      data.push({
-        tick: i,
-        liquidity: liquidity * 100,
-        price: price
-      });
-    }
-    
-    return data;
-  };
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [liquidityData, setLiquidityData] = useState<any>({})
 
-  const liquidityData = generateLiquidityData();
+  useEffect(() => {
+    if (Object.keys(liquidityData).length === 0 && !isLoading) {
+      setIsLoading(true)
+      const lpData = {} as any
+      client.queryEntities(`$owner = "${ownerAddress}" && lpAddress = "${lpAddress}"`).then((ownerEntities) => {
+        const decoder = new TextDecoder()
+        
+        for (const entity of ownerEntities) {
+          const data = JSON.parse(decoder.decode(entity.storageValue))
+          console.log(`Entity ${entity.entityKey}: ${data}`)
+          client.getEntityMetaData(entity.entityKey).then(({ numericAnnotations: [, { value: timestamp }]  }) => {
+            if (!lpData[timestamp]) lpData[timestamp] = []
+            lpData[timestamp].push(data)
+          })
+        }
+
+        setIsLoading(false)
+        setLiquidityData(lpData)
+      })
+    }
+  }, [liquidityData])
+
+  const activeTimestamp = useMemo(() => Object.keys(liquidityData)[currentIndex], [liquidityData, currentIndex])
+
+  console.log('active timestamp', activeTimestamp)
+  // Generate liquidity distribution data that resembles a bell curve
+  // const generateLiquidityData = (): LiquidityData[] => {
+  //   const data: LiquidityData[] = [];
+  //   const centerPrice = currentPrice;
+  //   const numBars = 100;
+    
+  //   for (let i = 0; i < numBars; i++) {
+  //     const priceRange = centerPrice * 0.4; // ±20% from center
+  //     const price = centerPrice - priceRange/2 + (priceRange * i / numBars);
+      
+  //     // Create bell curve distribution
+  //     const distanceFromCenter = Math.abs(i - numBars/2) / (numBars/2);
+  //     const liquidity = Math.exp(-Math.pow(distanceFromCenter * 2.5, 2)) * (0.8 + Math.random() * 0.4);
+      
+  //     data.push({
+  //       tick: i,
+  //       liquidity: liquidity * 100,
+  //       price: price
+  //     });
+  //   }
+    
+  //   return data;
+  // };
 
   // Generate gradient colors for each bar (purple to blue to cyan)
   const getBarColor = (index: number, total: number) => {
@@ -160,17 +218,17 @@ const LiquidityDistribution = ({
         </div>
 
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={liquidityData} margin={{ top: 20, right: 20, left: 20, bottom: 20 }}>
+          <BarChart data={liquidityData[activeTimestamp] || []} margin={{ top: 20, right: 20, left: 20, bottom: 20 }}>
             <XAxis 
               dataKey="tick" 
               hide
             />
             <YAxis hide />
             <Bar dataKey="liquidity" stroke="none">
-              {liquidityData.map((entry, index) => (
+              {liquidityData[activeTimestamp]?.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`} 
-                  fill={getBarColor(index, liquidityData.length)}
+                  fill={getBarColor(index, liquidityData[activeTimestamp].length)}
                 />
               ))}
             </Bar>
