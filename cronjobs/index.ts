@@ -34,40 +34,55 @@ const logger = new Logger<ILogObj>({
 });
 
 
-function prepareLiquidityData(summary: any, ticks: any) {
-  const chainId = 8453
-  const token0 = new Token(chainId, summary.token0.address, 18, summary.token0.symbol, summary.token0.symbol)
-  const token1 = new Token(chainId, summary.token1.address, 18, summary.token1.symbol, summary.token1.symbol)
+function prepareLiquidityData(summary: any, ticks: any, currentTick: any) {
+  const chainId = summary.chainId || 8453;
+  const token0 = new Token(chainId, summary.token0.address, summary.token0.decimals, summary.token0.symbol);
+  const token1 = new Token(chainId, summary.token1.address, summary.token1.decimals, summary.token1.symbol);
+
+  let activeLiquidity = summary.liquidity; // current in-range liquidity
 
   return ticks.map((tick: any, i: number) => {
-    const currentTick = parseInt(tick.tickIdx)
-    const liquidity = parseFloat(tick.liquidityGross || tick.liquidityNet || 0)
+    activeLiquidity += parseFloat(tick.liquidityNet);
 
-    // Get next tick to calculate range
-    const nextTick = ticks[i + 1]
-    const nextTickIdx = nextTick ? parseInt(nextTick.tickIdx) : currentTick + summary.tickSpacing
+    const lowerTick = parseInt(tick.tickIdx, 10);
+    const upperTick = ticks[i + 1]
+      ? parseInt(ticks[i + 1].tickIdx, 10)
+      : lowerTick + summary.tickSpacing;
 
-    try {
+    const priceLower = parseFloat(tickToPrice(token0, token1, lowerTick).toSignificant(6));
+    const priceUpper = parseFloat(tickToPrice(token0, token1, upperTick).toSignificant(6));
 
-      const priceLower = parseFloat(tickToPrice(token0, token1, currentTick).toSignificant(6))
-      const priceUpper = parseFloat(tickToPrice(token0, token1, nextTickIdx).toSignificant(6))
-      
-      const sqrtLower = Math.sqrt(priceLower)
-      const sqrtUpper = Math.sqrt(priceUpper)
-      
-      const token0Amount = liquidity * (sqrtUpper - sqrtLower) / (sqrtUpper * sqrtLower)
-      const token1Amount = liquidity * (sqrtUpper - sqrtLower)
-      
-      return {
-        tickIdx: currentTick,
-        token0Amount,
-        token1Amount,
-      }
-    } catch (e) {
-      console.log('e', e)
-      return {}
+    const sqrtLower = Math.sqrt(priceLower);
+    const sqrtUpper = Math.sqrt(priceUpper);
+    console.log('current tick', currentTick)
+    const sqrtCurrent = Math.sqrt(
+      parseFloat(tickToPrice(token0, token1, Number(currentTick)).toSignificant(6))
+    );
+
+    let token0Amount = 0;
+    let token1Amount = 0;
+
+    if (sqrtCurrent <= sqrtLower) {
+      // Price below this tick’s range → all in token0
+      token0Amount = activeLiquidity * (sqrtUpper - sqrtLower) / (sqrtLower * sqrtUpper);
+    } else if (sqrtCurrent >= sqrtUpper) {
+      // Price above this tick’s range → all in token1
+      token1Amount = activeLiquidity * (sqrtUpper - sqrtLower);
+    } else {
+      // Price within this tick range → both tokens
+      token0Amount = activeLiquidity * (sqrtUpper - sqrtCurrent) / (sqrtCurrent * sqrtUpper);
+      token1Amount = activeLiquidity * (sqrtCurrent - sqrtLower);
     }
-  })
+
+    const totalAmount = token0Amount + token1Amount;
+
+    return {
+      tickIdx: lowerTick,
+      priceLower,
+      priceUpper,
+      totalAmount,
+    };
+  }).filter(({ totalAmount }: any) => isFinite(totalAmount))
 }
 
 async function main() {
@@ -115,11 +130,22 @@ async function main() {
 
 
   console.log('summary', summary)
-  const lpData = prepareLiquidityData(summary, lpDistribution.ticks)
-  console.table('lp data', lpData.slice(-100))
 
+const targetTick = Number(summary.tick);
 
-  // console.table(ticks.slice(0, 100))
+const tickArrIdxForCurentPrice = lpDistribution.ticks.reduce((acc: any, curr: any, currentIndex: any) => {
+    const currentDiff = Math.abs(curr.tickIdx - targetTick);
+  // If acc is null (first iteration) or current difference is smaller, update accumulator
+    if (acc === null || currentDiff < acc.diff) {
+      return { idx: currentIndex, diff: currentDiff };
+    }
+    return acc;
+  }, null).idx;
+  
+  console.log('heheheh arr', tickArrIdxForCurentPrice, 'length= ', lpDistribution.ticks.length)
+  const lpData = prepareLiquidityData(summary, lpDistribution.ticks.slice(tickArrIdxForCurentPrice - 50, tickArrIdxForCurentPrice + 50), summary.tick)
+
+  console.log(lpData.slice(0, 100))
 
   
   // 3. QUERY - Find entity by annotations
@@ -132,43 +158,55 @@ async function main() {
   // }
 
   // TODO: CALCULATE TICK IDX FOR CURRENT PRICE BASED ON DATA IN SUMMARY COMPARED TO THE TICKS!!
-  const tickIdxForCurentPrice = 100
 
+
+  // use timestamp as annotation, restu jsut a json stringify for the datafield!!!!!
   // 6. BATCH OPERATIONS - Create multiple entities
   const now = new Date()
   now.setMinutes(0, 0, 0);
-  const batchEntities: GolemBaseCreate[] = lpData.slice(tickIdxForCurentPrice - 50, tickIdxForCurentPrice + 50).map(({ tickIdx, token0Amount, token1Amount }: any, i: number) => ({
-    data: new TextEncoder().encode(`Snapshot at datehour ${now.toISOString()}`),
+  const batchEntities: GolemBaseCreate[] = lpData.map(({ priceLower, priceUpper, totalAmount }: any, i: number) => ({
+    data: new TextEncoder().encode(JSON.stringify({ priceLower, priceUpper, totalAmount })),
     btl: 100,
-    stringAnnotations: [
-      new Annotation("type", "batch"),
-      new Annotation("index", i.toString()),
-      new Annotation("tickIdx", tickIdx.toString()), // because negative
-      new Annotation("token0Amount", Math.abs(token0Amount).toString()), // because bigint
-      new Annotation("token1Amount", Math.abs(token1Amount).toString()), // because bigint
-    ],
     numericAnnotations: [
       new Annotation("sequence", i + 1),  // Start from 1 per your SDK note
+      new Annotation("timestamp", now.getTime()), // unix timestamp
+    ],
+    stringAnnotations: [
+      new Annotation("type", "lpSnapShot"), 
+      new Annotation("lpAddress", summary.address), 
     ]
   }));
 
   
+  console.log('hehehe', batchEntities.length)
+
   const batchReceipts = await client.createEntities(batchEntities);
-  console.log(`Created ${batchReceipts.length} entities in batch`);
   
-  const [{entityKey}] = batchReceipts
+  const [{entityKey}, {entityKey: temp}] = batchReceipts
   // 7. BTL MANAGEMENT - Extend entity lifetime
   const extendReceipts = await client.extendEntities([{
     entityKey,
     numberOfBlocks: 100
   }]);
+  console.log(`Created ${batchReceipts.length} entities in batch with entityKey: ${entityKey}, temp: ${temp}`);
   console.log(`Extended BTL to block: ${extendReceipts[0].newExpirationBlock}`);
   
   // Check metadata to verify BTL
-  const metadata = await client.getEntityMetaData(entityKey);
-  console.log(`Entity expires at block: ${metadata.expiresAtBlock}`);
+  // const metadata = await client.getEntityMetaData(entityKey);
+  // console.log(`Entity expires at block: ${metadata.expiresAtBlock}`);
 
-  console.log("Complete!");
+  // TODO: $owner = 'me' , checksum version of address (copy from metamask) with mixed lwoer and uppercase
+
+  const ownerEntities = await client.queryEntities(`$owner = "${ownerAddress}"`)
+
+  const decoder = new TextDecoder()
+
+  for (const entity of ownerEntities) {
+    const data = JSON.parse(decoder.decode(entity.storageValue))
+    // console.log(`Entity ${entity.entityKey}: ${data}`)
+    // const { stringAnnotations, numericAnnotations } = await client.getEntityMetaData(entity.entityKey)
+    // console.log('temp', data)
+  }
 
   // Clean exit
   process.exit(0);
