@@ -13,10 +13,22 @@ interface PriceChartProps {
 }
 
 const PriceChart = ({ data, currentIndex }: PriceChartProps) => {
-  const displayData = data.slice(0, currentIndex + 1);
-  const currentPrice = data[currentIndex]?.price || 0;
-  const previousPrice = data[currentIndex - 1]?.price || currentPrice;
-  const priceChange = ((currentPrice - previousPrice) / previousPrice) * 100;
+  // Safety checks
+  if (!data || data.length === 0 || currentIndex < 0) {
+    return (
+      <Card className="p-6 bg-card shadow-card border-border">
+        <div className="flex items-center justify-center h-80">
+          <p className="text-muted-foreground">No chart data available</p>
+        </div>
+      </Card>
+    );
+  }
+
+  const safeCurrentIndex = Math.min(currentIndex, data.length - 1);
+  const displayData = data.slice(0, safeCurrentIndex + 1);
+  const currentPrice = data[safeCurrentIndex]?.price || 0;
+  const previousPrice = data[safeCurrentIndex - 1]?.price || currentPrice;
+  const priceChange = previousPrice !== 0 ? ((currentPrice - previousPrice) / previousPrice) * 100 : 0;
 
   return (
     <Card className="p-6 bg-card shadow-card border-border">
@@ -27,17 +39,20 @@ const PriceChart = ({ data, currentIndex }: PriceChartProps) => {
         </div>
         <div className="text-right">
           <div className="text-3xl font-bold text-foreground">
-            ${currentPrice.toFixed(4)}
+            ${typeof currentPrice === 'number' && !isNaN(currentPrice) ? currentPrice.toFixed(4) : '0.0000'}
           </div>
           <div className={`text-sm ${priceChange >= 0 ? 'text-success' : 'text-destructive'}`}>
-            {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}%
+            {priceChange >= 0 ? '+' : ''}{typeof priceChange === 'number' && !isNaN(priceChange) ? priceChange.toFixed(2) : '0.00'}%
           </div>
         </div>
       </div>
       
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={displayData}>
+          <LineChart 
+            data={displayData}
+            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+          >
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
             <XAxis 
               dataKey="timestamp" 
