@@ -36,7 +36,9 @@ export default function App() {
   
     useEffect(() => {
     (async () => {
+      debugger
       await sdk.actions.ready();
+      console.log('sdk', sdk)
     })();
   }, []);
 
