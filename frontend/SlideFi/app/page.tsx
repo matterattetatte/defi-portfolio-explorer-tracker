@@ -24,11 +24,19 @@ import { Icon } from "./components/DemoComponents";
 import { Home } from "./components/DemoComponents";
 import { Features } from "./components/DemoComponents";
 import { MetaMaskWallet } from "./components/MetaMaskWallet";
+import PriceChart from "@/components/PriceChart";
+import LPAnalytics from "@/components/LPAnalytics";
+import LiquidityDistribution from "@/components/LiquidityDistribution";
+import { useMockData } from "@/hooks/useMockData";
 
 export default function App() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
   const [frameAdded, setFrameAdded] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
+  
+  // DeFi Analytics state
+  const { priceData, lpData } = useMockData();
+  const [currentIndex, setCurrentIndex] = useState(priceData.length - 1);
 
   const addFrame = useAddFrame();
   const openUrl = useOpenUrl();
@@ -43,6 +51,10 @@ export default function App() {
     const frameAdded = await addFrame();
     setFrameAdded(Boolean(frameAdded));
   }, [addFrame]);
+
+  // DeFi Analytics handlers
+  const handleZoomIn = () => {};
+  const handleZoomOut = () => {};
 
   const saveFrameButton = useMemo(() => {
     if (context && !context.client.added) {
@@ -97,7 +109,22 @@ export default function App() {
         </header>
 
         <main className="flex-1">
-          {activeTab === "home" && <Home setActiveTab={setActiveTab} />}
+          {activeTab === "home" && (
+            <div>
+              <Home setActiveTab={setActiveTab} />
+              {/* DeFi Analytics Navigation */}
+              <div className="mt-4 space-y-2">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => setActiveTab("defi")}
+                >
+                  <Icon name="star" size="sm" className="mr-2" />
+                  DeFi Analytics
+                </Button>
+              </div>
+            </div>
+          )}
           {activeTab === "features" && <Features setActiveTab={setActiveTab} />}
           {activeTab === "wallet" && (
             <div>
@@ -120,6 +147,83 @@ export default function App() {
                   ← Back to Home
                 </Button>
               </div>
+              </div>
+          )}
+          {activeTab === "defi" && (
+            <div className="space-y-6">
+              {/* DeFi Analytics Header */}
+              <div className="text-center">
+                <div className="flex items-center justify-between mb-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setActiveTab("home")}
+                    className="text-muted-foreground"
+                  >
+                    <Icon name="arrow-right" size="sm" className="mr-1 rotate-180" />
+                    Back
+                  </Button>
+                  <div className="flex-1"></div>
+                </div>
+                <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
+                  DeFi Analytics
+                </h1>
+                <p className="text-muted-foreground text-sm">
+                  Advanced liquidity pool analytics and historical insights
+                </p>
+              </div>
+
+              {/* DeFi Analytics Content */}
+              {priceData.length > 0 ? (
+                <div className="space-y-4">
+                  {/* Current Price Display */}
+                  <div className="bg-card p-4 rounded-lg border">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Current Price</p>
+                        <p className="text-2xl font-bold text-primary">
+                          ${priceData[currentIndex]?.price?.toFixed(4) || '14.50'}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-muted-foreground">Base Network</p>
+                        <p className="text-primary font-medium">Uniswap V3</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Liquidity Distribution */}
+                  <LiquidityDistribution
+                    currentPrice={priceData[currentIndex]?.price || 14.50}
+                    onZoomIn={handleZoomIn}
+                    onZoomOut={handleZoomOut}
+                    currentDate={priceData[currentIndex]?.timestamp || ''}
+                    currentApr={lpData[currentIndex]?.apr || 0}
+                    currentIndex={currentIndex}
+                    maxIndex={priceData.length - 1}
+                    onIndexChange={setCurrentIndex}
+                    timestamps={priceData.map(d => d.timestamp)}
+                  />
+
+                  {/* Price Chart */}
+                  <PriceChart data={priceData} currentIndex={currentIndex} />
+
+                  {/* LP Analytics */}
+                  <div>
+                    <h2 className="text-lg font-semibold text-foreground mb-3">
+                      Liquidity Pool Metrics
+                    </h2>
+                    <LPAnalytics data={lpData[currentIndex] || lpData[lpData.length - 1]} />
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center py-8">
+                  <div className="text-center">
+                    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Loading analytics...</p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </main>
