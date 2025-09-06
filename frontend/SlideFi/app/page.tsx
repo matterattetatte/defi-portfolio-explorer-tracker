@@ -23,6 +23,7 @@ import { Button } from "./components/DemoComponents";
 import { Icon } from "./components/DemoComponents";
 import { Home } from "./components/DemoComponents";
 import { Features } from "./components/DemoComponents";
+import { MetaMaskWallet } from "./components/MetaMaskWallet";
 
 export default function App() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
@@ -98,6 +99,29 @@ export default function App() {
         <main className="flex-1">
           {activeTab === "home" && <Home setActiveTab={setActiveTab} />}
           {activeTab === "features" && <Features setActiveTab={setActiveTab} />}
+          {activeTab === "wallet" && (
+            <div>
+              <div className="mb-6">
+                <h1 className="text-2xl font-bold text-[var(--app-foreground)] mb-2">
+                  Wallet Connection
+                </h1>
+                <p className="text-[var(--app-text-muted)]">
+                  Connect your MetaMask or other supported wallets
+                </p>
+              </div>
+              <MetaMaskWallet />
+              <div className="mt-6 flex justify-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setActiveTab("home")}
+                  className="text-[var(--app-text-muted)]"
+                >
+                  ← Back to Home
+                </Button>
+              </div>
+            </div>
+          )}
         </main>
 
         <footer className="mt-2 pt-4 flex justify-center">
