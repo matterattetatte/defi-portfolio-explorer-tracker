@@ -2,7 +2,6 @@
 
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
-import SlideFiLogo  from "../../public/slidefi-logo.png"
 import {
   Transaction,
   TransactionButton,
@@ -161,17 +160,26 @@ type HomeProps = {
 export function Home({ setActiveTab }: HomeProps) {
   return (
     <div className="space-y-6 animate-fade-in">
-      <img src={SlideFiLogo} alt="SlideFi Logo" />
+      <img src="/slidefi-logo.png" alt="SlideFi Logo" className="mx-auto h-20 w-auto" />
       <Card title="My First Mini App">
         <p className="text-[var(--app-foreground-muted)] mb-4">
           This is a minimalistic Mini App built with OnchainKit components.
         </p>
-        <Button
-          onClick={() => setActiveTab("features")}
-          icon={<Icon name="arrow-right" size="sm" />}
-        >
-          Explore Features
-        </Button>
+        <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+          <Button
+            onClick={() => setActiveTab("features")}
+            icon={<Icon name="arrow-right" size="sm" />}
+          >
+            Explore Features
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setActiveTab("wallet")}
+            icon={<Icon name="wallet" size="sm" />}
+          >
+            Connect Wallet
+          </Button>
+        </div>
       </Card>
 
       <TodoList />
@@ -182,7 +190,7 @@ export function Home({ setActiveTab }: HomeProps) {
 }
 
 type IconProps = {
-  name: "heart" | "star" | "check" | "plus" | "arrow-right";
+  name: "heart" | "star" | "check" | "plus" | "arrow-right" | "wallet";
   size?: "sm" | "md" | "lg";
   className?: string;
 }
@@ -270,6 +278,23 @@ export function Icon({ name, size = "md", className = "" }: IconProps) {
         <title>Arrow Right</title>
         <line x1="5" y1="12" x2="19" y2="12" />
         <polyline points="12 5 19 12 12 19" />
+      </svg>
+    ),
+    wallet: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <title>Wallet</title>
+        <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+        <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+        <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
       </svg>
     ),
   };
