@@ -9,6 +9,15 @@ const nextConfig = {
     config.externals.push("pino-pretty", "lokijs", "encoding");
     return config;
   },
+  redirects: async () => {
+    return [
+      {
+        source: '/.well-known/farcaster.json',
+        destination: 'https://api.farcaster.xyz/miniapps/hosted-manifest/01992017-d2ee-c972-b994-cd1567a516f9',
+        permanent: false, // false = 307
+      },
+    ];
+  },
 };
 
 export default nextConfig;
