@@ -11,6 +11,29 @@ const pools = [
     }
 ];
 
+const generateTicks = (priceLower: any, priceUpper: any, totalAmount: any) => {
+    const ticks = [];
+    const lower = parseFloat(priceLower);
+    const upper = parseFloat(priceUpper);
+    const numTicks = 100;
+    const step = (upper - lower) / (numTicks - 1);
+
+
+    for (let i = 0; i < numTicks; i++) {
+        const tickLower = lower + step * i;
+        const tickUpper = i === numTicks - 1 ? upper : lower + step * (i + 1);
+        ticks.push(
+            {
+                priceLower: parseFloat(tickLower.toFixed(6)),
+                priceUpper: parseFloat(tickUpper.toFixed(6)),
+                totalAmount: totalAmount
+            }
+        );
+    }
+
+    return ticks;
+}
+
 function generateFakeData() {
     const data: any[] = [];
     const endDate = new Date('2025-09-06T00:00:00Z');
@@ -27,17 +50,11 @@ function generateFakeData() {
             const totalAmount = (1 + Math.random() * 9).toFixed(15) + 'e' + (32 + Math.floor(Math.random() * 5));
             
             data.push({
-                timestamp: timestamp.toISOString(),
+                timestamp: timestamp.getTime(),
                 chain: pool.chain,
                 exchange: pool.exchange,
                 poolAddress: pool.poolAddress,
-                ticks: [
-                    {
-                        priceLower: parseFloat(priceLower),
-                        priceUpper: parseFloat(priceUpper),
-                        totalAmount: totalAmount
-                    }
-                ]
+                ticks: generateTicks(priceLower, priceUpper, totalAmount),
             });
         });
     }
