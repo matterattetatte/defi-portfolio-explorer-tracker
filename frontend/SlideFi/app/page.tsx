@@ -111,11 +111,9 @@ export default function App() {
           {activeTab === "defi" && (
             <div className="space-y-6">
               {/* DeFi Analytics Header */}
-              <div className="text-center">
-                <h1 className="text-2xl font-bold bg-clip-text mb-2">
-                  DeFi Analytics
-                </h1>
-                <p className="text-muted-foreground text-sm">
+              <div className="text-center bg-slate-800 rounded-lg p-4">
+                <img src="/slidefi-logo.png" alt="SlideFi Logo" className="mx-auto h-20 w-auto" />
+                <p className="text-white text-sm">
                   Advanced liquidity pool analytics and historical insights
                 </p>
               </div>
