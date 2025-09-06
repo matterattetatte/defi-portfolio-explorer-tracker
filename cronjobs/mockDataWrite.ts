@@ -63,15 +63,15 @@ const mockDataWrite = async () => {
     await client.deleteEntities(entityKeys)
     console.log(`Deleted ${entityKeys.length} entities. Now creating mock data...`)
 
+    const today = new Date()
+    today.setMinutes(0, 0, 0);
     await Promise.all(lps.map(async (lp: any) => {
-        const now = new Date()
-        now.setMinutes(0, 0, 0);
         const batchEntities: GolemBaseCreate[] = await Promise.all(lp.ticks.map(({ priceLower, priceUpper, totalAmount }: any, i: number) => ({
             data: new TextEncoder().encode(JSON.stringify({ priceLower, priceUpper, totalAmount })),
             btl: 1296000,  // Block-To-Live ~30 days (each block ~2 seconds)
             numericAnnotations: [
             new Annotation("sequence", i + 1),  // Start from 1 per your SDK note
-            new Annotation("timestamp", now.getTime()), // unix timestamp
+            new Annotation("timestamp", new Date(new Date().setMinutes(0,0,0) - i * 24*60*60*1000)), // minux 30 days from now for mocking
             ],
             stringAnnotations: [
             new Annotation("type", "lpSnapShot"), 
