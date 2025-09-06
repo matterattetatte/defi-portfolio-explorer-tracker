@@ -2,6 +2,7 @@
 
 import { 
   createClient, 
+  createROClient,
   type GolemBaseClient,
   type GolemBaseCreate,
   type GolemBaseUpdate,
@@ -141,24 +142,8 @@ const tickArrIdxForCurentPrice = lpDistribution.ticks.reduce((acc: any, curr: an
     }
     return acc;
   }, null).idx;
-  
-  console.log('heheheh arr', tickArrIdxForCurentPrice, 'length= ', lpDistribution.ticks.length)
+
   const lpData = prepareLiquidityData(summary, lpDistribution.ticks.slice(tickArrIdxForCurentPrice - 50, tickArrIdxForCurentPrice + 50), summary.tick)
-
-  console.log(lpData.slice(0, 100))
-
-  
-  // 3. QUERY - Find entity by annotations
-  // const queryResults = await client.queryEntities(`id = "${id}" && version = 1`);
-  // console.log(`Found ${queryResults.length} matching entities`);
-  
-  // for (const result of queryResults) {
-  //   const data = JSON.parse(new TextDecoder().decode(result.storageValue));
-  //   console.log("Query result:", data);
-  // }
-
-  // TODO: CALCULATE TICK IDX FOR CURRENT PRICE BASED ON DATA IN SUMMARY COMPARED TO THE TICKS!!
-
 
   // use timestamp as annotation, restu jsut a json stringify for the datafield!!!!!
   // 6. BATCH OPERATIONS - Create multiple entities
@@ -177,27 +162,11 @@ const tickArrIdxForCurentPrice = lpDistribution.ticks.reduce((acc: any, curr: an
     ]
   }));
 
-  
   console.log('hehehe', batchEntities.length)
 
   const batchReceipts = await client.createEntities(batchEntities);
-  
-  const [{entityKey}, {entityKey: temp}] = batchReceipts
-  // 7. BTL MANAGEMENT - Extend entity lifetime
-  const extendReceipts = await client.extendEntities([{
-    entityKey,
-    numberOfBlocks: 100
-  }]);
-  console.log(`Created ${batchReceipts.length} entities in batch with entityKey: ${entityKey}, temp: ${temp}`);
-  console.log(`Extended BTL to block: ${extendReceipts[0].newExpirationBlock}`);
-  
-  // Check metadata to verify BTL
-  // const metadata = await client.getEntityMetaData(entityKey);
-  // console.log(`Entity expires at block: ${metadata.expiresAtBlock}`);
 
-  // TODO: $owner = 'me' , checksum version of address (copy from metamask) with mixed lwoer and uppercase
-
-  const ownerEntities = await client.queryEntities(`$owner = "${ownerAddress}"`)
+  const ownerEntities = await client.queryEntities(`$owner = "${ownerAddress}" && lpAddress = "${summary.address}" && type = "lpSnapshot"`)
 
   const decoder = new TextDecoder()
 
