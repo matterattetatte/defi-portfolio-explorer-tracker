@@ -13,7 +13,6 @@ import {
   WalletDropdown,
   WalletDropdownDisconnect,
 } from "@coinbase/onchainkit/wallet";
-import { useEffect } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
 import { useState } from "react";
 import { Button } from "./components/DemoComponents";
