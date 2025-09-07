@@ -13,15 +13,13 @@ import {
   WalletDropdown,
   WalletDropdownDisconnect,
 } from "@coinbase/onchainkit/wallet";
-// import { sdk } from '@farcaster/miniapp-sdk';
-import { useState } from "react";
+import { sdk } from '@farcaster/miniapp-sdk';
+import { useEffect, useState } from "react";
 import { Button } from "./components/DemoComponents";
 import { MetaMaskWallet } from "@/app/components/MetaMaskWallet";
 import LPAnalytics from "@/components/LPAnalytics";
 import LiquidityDistribution from "@/components/LiquidityDistribution";
 import { useMockData } from "@/hooks/useMockData";
-
-// await sdk.actions.ready();
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("defi");
@@ -33,6 +31,10 @@ export default function App() {
   // DeFi Analytics handlers
   const handleZoomIn = () => {};
   const handleZoomOut = () => {};
+
+  useEffect(() => {
+    sdk.actions.ready();
+  })
 
 
   return (
