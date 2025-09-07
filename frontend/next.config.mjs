@@ -27,10 +27,10 @@ async headers() {
             key: 'Content-Security-Policy',
             value: "frame-ancestors *;" // Allows embedding from any domain
           },
-          {
-            key: 'X-Frame-Options',
-            value: 'ALLOWALL',  // Try to disable frame blocking
-          },
+          // {
+          //   key: 'X-Frame-Options',
+          //   value: 'ALLOWALL',  // Try to disable frame blocking
+          // }, trying out
         ],
       },
     ];
