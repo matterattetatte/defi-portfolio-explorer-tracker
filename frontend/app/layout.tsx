@@ -17,12 +17,12 @@ export async function generateMetadata(): Promise<Metadata> {
     description: "Advanced liquidity pool analytics and historical insights for DeFi portfolios",
     other: {
       'fc:frame': JSON.stringify({
-        // version: 'vNext',
+        version: 'next',
         imageUrl: `${baseUrl}/hero.png`,
         button: {
           title: 'Launch Pool keeper',
           action: {
-            type: 'launch_miniapp',
+            type: 'launch_frame',
             name: 'Pool keeper',
             url: baseUrl,
             splashImageUrl: `${baseUrl}/splash.png`,
