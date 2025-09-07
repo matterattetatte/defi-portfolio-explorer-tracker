@@ -23,7 +23,10 @@ async headers() {
       {
         source: '/(.*)',
         headers: [
-          // No frame-ancestors header set here
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors *;" // Allows embedding from any domain
+          },
           {
             key: 'X-Frame-Options',
             value: 'ALLOWALL',  // Try to disable frame blocking
