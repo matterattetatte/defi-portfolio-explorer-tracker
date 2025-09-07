@@ -18,6 +18,20 @@ const nextConfig = {
       },
     ];
   },
+async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          // No frame-ancestors header set here
+          {
+            key: 'X-Frame-Options',
+            value: 'ALLOWALL',  // Try to disable frame blocking
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
