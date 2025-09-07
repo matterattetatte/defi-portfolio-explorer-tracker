@@ -60,9 +60,15 @@ const mockDataWrite = async () => {
     const entityKeys = ownerEntities.map((oe: any) => oe.entityKey)
 
     console.log('Deleting entities....', )
-    await client.deleteEntities(entityKeys.slice(0, 2000))
-    await client.deleteEntities(entityKeys.slice(2000, 4000))
-    await client.deleteEntities(entityKeys.slice(4000, 6001))
+    // Delete entities in smaller batches to avoid 413 errors
+    const deleteBatchSize = 100;
+    for (let i = 0; i < entityKeys.length; i += deleteBatchSize) {
+      const batch = entityKeys.slice(i, i + deleteBatchSize);
+      console.log(`Deleting batch ${Math.floor(i/deleteBatchSize) + 1}/${Math.ceil(entityKeys.length/deleteBatchSize)} (${batch.length} entities)`);
+      await client.deleteEntities(batch);
+      // Add a small delay between batches
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
     console.log(`Deleted ${entityKeys.length} entities. Now creating mock data...`)
 
     const today = new Date()
@@ -84,12 +90,31 @@ const mockDataWrite = async () => {
         }))
       })
 
-      await client.createEntities(entitiesToBatch.slice(0, 1000));
-      await client.createEntities(entitiesToBatch.slice(1000, 2000));
-      await client.createEntities(entitiesToBatch.slice(2000, 3000));
-      await client.createEntities(entitiesToBatch.slice(3000, 4000));
-      await client.createEntities(entitiesToBatch.slice(4000, 5000));
-      await client.createEntities(entitiesToBatch.slice(5000));
+      // Create entities in smaller batches to avoid 413 errors
+      const batchSize = 100; // Reduced from 1000 to 100
+      for (let i = 0; i < entitiesToBatch.length; i += batchSize) {
+        const batch = entitiesToBatch.slice(i, i + batchSize);
+        console.log(`Creating batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(entitiesToBatch.length/batchSize)} (${batch.length} entities)`);
+        try {
+          await client.createEntities(batch);
+        } catch (error) {
+          console.error(`Error creating batch ${Math.floor(i/batchSize) + 1}:`, error);
+          // If batch is still too large, try even smaller batches
+          if (error.message?.includes('413') || error.message?.includes('Payload Too Large')) {
+            console.log('Batch too large, splitting into smaller chunks...');
+            const smallerBatchSize = 50;
+            for (let j = 0; j < batch.length; j += smallerBatchSize) {
+              const smallerBatch = batch.slice(j, j + smallerBatchSize);
+              await client.createEntities(smallerBatch);
+              await new Promise(resolve => setTimeout(resolve, 200));
+            }
+          } else {
+            throw error;
+          }
+        }
+        // Add a small delay between batches to avoid overwhelming the server
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
 }
 
 mockDataWrite().then(() => {

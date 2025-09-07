@@ -11,22 +11,34 @@ const pools = [
     }
 ];
 
-const generateTicks = (priceLower: any, priceUpper: any, totalAmount: any) => {
+const generateTicks = (priceLower: any, priceUpper: any, baseAmount: any) => {
     const ticks = [];
     const lower = parseFloat(priceLower);
     const upper = parseFloat(priceUpper);
     const numTicks = 100;
     const step = (upper - lower) / (numTicks - 1);
-
+    const centerPrice = (lower + upper) / 2;
 
     for (let i = 0; i < numTicks; i++) {
         const tickLower = lower + step * i;
         const tickUpper = i === numTicks - 1 ? upper : lower + step * (i + 1);
+        const tickCenter = (tickLower + tickUpper) / 2;
+        
+        // Create a bell curve distribution centered around the middle price
+        const distanceFromCenter = Math.abs(tickCenter - centerPrice) / (centerPrice * 0.1); // Normalize distance
+        const liquidityMultiplier = Math.exp(-Math.pow(distanceFromCenter, 2) / 2); // Bell curve
+        
+        // Add some randomness to make it more realistic
+        const randomFactor = 0.5 + Math.random() * 1.0; // 0.5 to 1.5 multiplier
+        
+        // Calculate the total amount for this tick
+        const tickAmount = parseFloat(baseAmount) * liquidityMultiplier * randomFactor;
+        
         ticks.push(
             {
                 priceLower: parseFloat(tickLower.toFixed(6)),
                 priceUpper: parseFloat(tickUpper.toFixed(6)),
-                totalAmount: totalAmount
+                totalAmount: tickAmount.toFixed(15) + 'e' + (32 + Math.floor(Math.random() * 5))
             }
         );
     }
