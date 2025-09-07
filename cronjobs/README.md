@@ -1,5 +1,7 @@
 # golem-sdk-practice
 
+test
+
 To install dependencies:
 
 ```bash
