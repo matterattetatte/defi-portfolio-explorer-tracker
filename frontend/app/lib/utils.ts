@@ -68,7 +68,7 @@ export function calculateDayAPR(dayIndex, dailyData, lowerTick, upperTick, posit
  * @param {number} volumeFee - Fee rate decimal (e.g., 0.003)
  * @returns {Object} - { averageAPR, dailyAPRArray } with daily APRs and average
  */
-function calculateAverageAPR(daysCount, dailyData, lowerTick, upperTick, positionLiquidity, volumeFee) {
+export function calculateAverageAPR(daysCount, dailyData, lowerTick, upperTick, positionLiquidity, volumeFee) {
   const dailyAPRArray = [];
   let aprSum = 0;
 
