@@ -56,3 +56,30 @@ export function calculateDayAPR(dayIndex, dailyData, lowerTick, upperTick, posit
     dailyAPR,
   };
 }
+
+
+/**
+ * Calculate average APR over last N days
+ * @param {number} daysCount - Number of days to track (e.g., 30)
+ * @param {Array} dailyData - Array of daily liquidity/volume snapshots
+ * @param {number} lowerTick - Position lower tick bound
+ * @param {number} upperTick - Position upper tick bound
+ * @param {number} positionLiquidity - Position liquidity value per day (can be constant or from daily data)
+ * @param {number} volumeFee - Fee rate decimal (e.g., 0.003)
+ * @returns {Object} - { averageAPR, dailyAPRArray } with daily APRs and average
+ */
+function calculateAverageAPR(daysCount, dailyData, lowerTick, upperTick, positionLiquidity, volumeFee) {
+  const dailyAPRArray = [];
+  let aprSum = 0;
+
+  for (let i = 0; i < daysCount; i++) {
+    if (i >= dailyData.length) break;
+    const dayAPRData = calculateDayAPR(i, dailyData, lowerTick, upperTick, positionLiquidity, volumeFee);
+    dailyAPRArray.push(dayAPRData);
+    aprSum += dayAPRData.dailyAPR;
+  }
+
+  const averageAPR = daysCount > 0 ? aprSum / daysCount : 0;
+
+  return { averageAPR, dailyAPRArray };
+}
